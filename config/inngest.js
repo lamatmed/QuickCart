@@ -6,23 +6,31 @@ import User from "@/models/User";
 export const inngest = new Inngest({ id: "quickcart-next" });
 
 // Fonction pour créer un utilisateur
-export const syncUserCreate = inngest.createFunction({ id: 'syncUserCreate-from-clerk' }, { event: 'clerk/user.created' },
+export const syncUserCreate = inngest.createFunction({ id: "syncUserCreate-from-clerk" }, { event: "clerk/user.created" },
     async({ event }) => {
+        console.log("🔄 Événement reçu :", event);
 
-        const { id, first_name, last_name, email_address, image_url } = event.data
+        await connectDB();
+        console.log("✅ Connecté à MongoDB");
 
-        const userData = {
-            _id: id,
-            name: first_name + '' + last_name,
-            email: email_address[0].email_address,
-            imageUrl: image_url,
+        const { id, first_name, last_name, email_address, image_url } = event.data;
+        console.log("📩 Données utilisateur :", { id, first_name, last_name, email_address, image_url });
+
+        try {
+            const userData = {
+                _id: id,
+                name: `${first_name} ${last_name}`,
+                email: email_address[0].email_address,
+                imageUrl: image_url,
+            };
+
+            const user = await User.create(userData);
+            console.log("🎉 Utilisateur créé :", user);
+        } catch (error) {
+            console.error("❌ Erreur lors de la création de l'utilisateur :", error);
         }
-        await connectDB()
-        await User.create(userData)
-
-
     }
-)
+);
 
 // Fonction pour mettre à jour un utilisateur
 export const syncUserUpdate = inngest.createFunction({
