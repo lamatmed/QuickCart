@@ -1,5 +1,3 @@
-"use server";
-
 import { serve } from "inngest/next";
 import { inngest, syncUserCreate, syncUserDelete, syncUserUpdate } from "@/config/inngest";
 

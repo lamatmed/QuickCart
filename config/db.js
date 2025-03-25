@@ -1,36 +1,28 @@
 import mongoose from 'mongoose';
 
-if (!global.mongoose) {
-    global.mongoose = { connection: null, promise: null };
-}
+
 let cached = global.mongoose;
+if (!cached) {
+    global.mongoose = { conn: null, promise: null }
+}
+
 
 async function connectDB() {
-    if (cached.connection) return cached.connection;
-
-    if (!cached.promise) {
-        console.log("📢 Tentative de connexion à MongoDB...");
-
-        const opts = {
-            dbName: "QuickCart", // Définir explicitement la base de données
-            bufferCommands: false,
-            useNewUrlParser: true,
-            useUnifiedTopology: true,
-        };
-
-        cached.promise = mongoose.connect(process.env.MONGODB_URI, opts)
-            .then((mongoose) => {
-                console.log("✅ MongoDB connecté avec succès !");
-                return mongoose;
-            })
-            .catch((err) => {
-                console.error("❌ Erreur de connexion MongoDB :", err);
-                throw err;
-            });
+    if (cached.conn) {
+        return cached.conn
     }
+    if (!cached.promise) {
+        const opts = { bufferCommands: false }
 
-    cached.connection = await cached.promise;
-    return cached.connection;
+        cached.promise = mongoose.connect(`${process.env.MONGODB_URI}/quickcart`, opts).then(mongoose => {
+            return mongoose
+
+        })
+
+
+    }
+    cached.conn = await cached.promise;
+    return cached.conn;
 }
 
 export default connectDB;
